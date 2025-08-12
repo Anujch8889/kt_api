@@ -12,10 +12,11 @@ app.get("/", (req, res) =>{
     res.send("Hello i am live");
 });
 
-app.get("/service", (req, res)=>{
+app.get("/courses", (req, res)=>{
     res.send(apiData)
 })
 
 app.listen(port, ()=>{
     console.log("i am live again");
+
 });
