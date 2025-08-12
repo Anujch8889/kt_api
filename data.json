@@ -1,0 +1,202 @@
+[
+  {
+    "id": "1",
+    "title": "DevOps Fundamentals",
+    "description": "Understand CI/CD, containers, and cloud tools.",
+    "longDescription": "Learn the basics of DevOps, including continuous integration/deployment, containerization with Docker, and tools like Jenkins, Git, and Kubernetes.",
+    "duration": "6 weeks",
+    "price": "₹2499",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "2",
+    "title": "Cybersecurity Basics",
+    "description": "Learn how to protect systems and networks.",
+    "longDescription": "This course covers the fundamentals of cybersecurity, including network security, ethical hacking, firewalls, and securing web applications.",
+    "duration": "6 weeks",
+    "price": "₹1999",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "3",
+    "title": "MS Office Complete Course",
+    "description": "Master Word, Excel, PowerPoint, and Outlook.",
+    "longDescription": "Get hands-on training in MS Office tools including document formatting, spreadsheets, presentations, and email communication.",
+    "duration": "4 weeks",
+    "price": "₹999",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "4",
+    "title": "English Speaking Course",
+    "description": "Improve your spoken English and communication skills.",
+    "longDescription": "Focuses on pronunciation, grammar, vocabulary building, and fluency. Practical exercises and real-life conversations included.",
+    "duration": "8 weeks",
+    "price": "₹1199",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "5",
+    "title": "C/C++ Programming",
+    "description": "Learn core programming with C and C++.",
+    "longDescription": "Covers syntax, control structures, pointers, memory management, OOP in C++, and common algorithms for problem-solving.",
+    "duration": "6 weeks",
+    "price": "₹1299",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "6",
+    "title": "Basic of Computer",
+    "description": "Learn fundamental computer concepts.",
+    "longDescription": "Ideal for beginners: covers operating systems, hardware, software, file handling, and basic troubleshooting.",
+    "duration": "3 weeks",
+    "price": "₹799",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "7",
+    "title": "Flutter Development",
+    "description": "Build cross-platform apps using Flutter.",
+    "longDescription": "Learn Dart programming and use Flutter to create modern, responsive mobile apps for Android and iOS.",
+    "duration": "6 weeks",
+    "price": "₹1999",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "8",
+    "title": "Kotlin Programming",
+    "description": "Android development with Kotlin.",
+    "longDescription": "Covers Kotlin syntax, Android Studio integration, and best practices for modern Android app development.",
+    "duration": "5 weeks",
+    "price": "₹1599",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "9",
+    "title": "Ruby Programming",
+    "description": "Begin with Ruby and web development basics.",
+    "longDescription": "Learn Ruby syntax, control structures, and OOP. A good start to explore Ruby on Rails later.",
+    "duration": "4 weeks",
+    "price": "₹1399",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "10",
+    "title": "React JS Web Development",
+    "description": "Create dynamic web apps with React JS.",
+    "longDescription": "Learn about React components, hooks, state management, and deploying web applications.",
+    "duration": "6 weeks",
+    "price": "₹1999",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "11",
+    "title": "Angular Development",
+    "description": "Develop scalable web apps with Angular.",
+    "longDescription": "Master components, services, routing, and RxJS in Angular framework.",
+    "duration": "7 weeks",
+    "price": "₹2099",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "12",
+    "title": "Data Science Foundations",
+    "description": "Learn data handling, analysis, and visualization.",
+    "longDescription": "Covers Python for data science, NumPy, Pandas, data cleaning, visualization, and basic machine learning.",
+    "duration": "8 weeks",
+    "price": "₹2999",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "13",
+    "title": "AI & Machine Learning",
+    "description": "Dive into ML algorithms and AI systems.",
+    "longDescription": "Understand supervised and unsupervised learning, neural networks, and model evaluation with real-world datasets.",
+    "duration": "10 weeks",
+    "price": "₹3999",
+    "level": "Advanced",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "14",
+    "title": "Prompt Engineering for AI",
+    "description": "Learn to write effective prompts for AI tools.",
+    "longDescription": "Master prompt strategies for ChatGPT, image generators, and other AI platforms to enhance productivity.",
+    "duration": "2 weeks",
+    "price": "₹799",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "15",
+    "title": "How to Use AI Tools",
+    "description": "Get hands-on with popular AI tools.",
+    "longDescription": "Covers how to use AI for writing, coding, image generation, and business automation using tools like ChatGPT, Copilot, Midjourney, etc.",
+    "duration": "4 weeks",
+    "price": "₹999",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "16",
+    "title": "Core Java Programming",
+    "description": "Learn Java from scratch including OOP concepts.",
+    "longDescription": "This course covers fundamental Java programming concepts, including variables, data types, loops, functions, and object-oriented principles. Ideal for anyone looking to build strong programming foundations.",
+    "duration": "6 weeks",
+    "price": "₹1299",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "17",
+    "title": "Python Programming Essentials",
+    "description": "Start coding with Python and explore real-world examples.",
+    "longDescription": "This beginner-friendly course teaches Python basics, including variables, control flow, functions, and data structures. Hands-on examples will guide you through problem-solving techniques.",
+    "duration": "5 weeks",
+    "price": "₹1199",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "18",
+    "title": "Full Stack Web Development",
+    "description": "Learn to build websites using HTML, CSS, JavaScript, and backend tech.",
+    "longDescription": "From designing responsive layouts with HTML/CSS to writing interactive scripts in JavaScript and building server-side applications with Node.js, this course prepares you to become a full stack developer.",
+    "duration": "10 weeks",
+    "price": "₹3499",
+    "level": "Intermediate",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "19",
+    "title": "Diploma in Computer Applications (DCA)",
+    "description": "Basic diploma course in computer applications.",
+    "longDescription": "DCA is designed for beginners and covers basic computer concepts, MS Office, internet applications, and an introduction to programming. Suitable for students and working professionals.",
+    "duration": "6 months",
+    "price": "₹4999",
+    "level": "Beginner",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  },
+  {
+    "id": "20",
+    "title": "Post Graduate Diploma in Computer Applications (PGDCA)",
+    "description": "Advanced diploma course for postgraduates in computer applications.",
+    "longDescription": "PGDCA offers in-depth knowledge of programming languages, database management, networking, and software development, preparing students for careers in IT and software industries.",
+    "duration": "1 year",
+    "price": "₹8999",
+    "level": "Advanced",
+    "image": "https://i.ibb.co/WNhsPC7L/tsest1.jpg"
+  }
+]
