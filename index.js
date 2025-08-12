@@ -63,7 +63,7 @@ app.use((req, res, next) => {
 // Root route
 app.get("/", (req, res) => {
     res.json({
-        message: "Hello, I am live with Anuj!",
+        message: "Hello, I am live with Anuj Ji!",
         timestamp: new Date().toISOString(),
         status: "running"
     });
@@ -435,3 +435,4 @@ app.listen(port, () => {
     console.log('   POST   /courses/reset-sequence');
     console.log('   POST   /courses/recreate-table (EMERGENCY)');
 });
+
