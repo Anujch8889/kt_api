@@ -259,8 +259,51 @@ app.delete("/courses/:id", async (req, res) => {
 
         console.log("✅ Database delete successful:", result.rows[0]);
 
+        // 🆕 AUTO-REORGANIZE IDs after delete
+        console.log("🔄 Auto-reorganizing course IDs...");
+        
+        try {
+            // Get current courses ordered by creation time
+            const coursesResult = await pool.query("SELECT * FROM courses ORDER BY created_at ASC");
+            const courses = coursesResult.rows;
+            
+            if (courses.length > 0) {
+                // Temporarily drop the constraint
+                await pool.query("ALTER TABLE courses DROP CONSTRAINT IF EXISTS courses_pkey");
+                
+                // Update IDs sequentially
+                for (let i = 0; i < courses.length; i++) {
+                    const newId = i + 1;
+                    const oldId = courses[i].id;
+                    
+                    if (newId !== oldId) {
+                        await pool.query("UPDATE courses SET id = $1 WHERE id = $2", [newId, oldId]);
+                    }
+                }
+                
+                // Recreate the primary key constraint
+                await pool.query("ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (id)");
+                
+                // Reset the sequence
+                await pool.query(`ALTER SEQUENCE courses_id_seq RESTART WITH ${courses.length + 1}`);
+                
+                console.log("✅ IDs reorganized successfully");
+            } else {
+                // If no courses left, reset sequence to 1
+                await pool.query("ALTER SEQUENCE courses_id_seq RESTART WITH 1");
+            }
+        } catch (reorganizeError) {
+            console.error("⚠️ ID reorganization failed:", reorganizeError);
+            // Restore primary key if reorganization failed
+            try {
+                await pool.query("ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (id)");
+            } catch (restoreError) {
+                console.error("❌ Failed to restore primary key:", restoreError);
+            }
+        }
+
         res.json({
-            message: "Course deleted successfully",
+            message: "Course deleted and IDs reorganized successfully",
             data: result.rows[0],
             success: true
         });
@@ -435,4 +478,5 @@ app.listen(port, () => {
     console.log('   POST   /courses/reset-sequence');
     console.log('   POST   /courses/recreate-table (EMERGENCY)');
 });
+
 
