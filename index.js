@@ -33,18 +33,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// Isko bilkul bhi changee mt krna jab tak koi bhout important kam na ho
-// Enhanced table creation with DROP and CREATE
+// ✅ SAFE TABLE CREATION - Data preserve रहेगा
 (async () => {
     try {
-        console.log("🔄 Dropping and recreating table...");
+        console.log("🔄 Ensuring table exists...");
         
-        // Drop table if exists (be careful - this will delete existing data)
-        await pool.query(`DROP TABLE IF EXISTS courses;`);
-        
-        // Create fresh table
+        // ✅ CREATE TABLE IF NOT EXISTS - यह existing data को delete नहीं करता
         await pool.query(`
-            CREATE TABLE courses (
+            CREATE TABLE IF NOT EXISTS courses (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 description TEXT,
@@ -57,10 +53,10 @@ app.use((req, res, next) => {
             );
         `);
         
-        console.log("✅ Table recreated successfully");
+        console.log("✅ Table ready (existing data preserved)");
         
     } catch (err) {
-        console.error("❌ Table recreation error:", err.message);
+        console.error("❌ Table creation error:", err.message);
     }
 })();
 
@@ -279,7 +275,7 @@ app.delete("/courses/:id", async (req, res) => {
     }
 });
 
-// ⭐ NEW: Reset ID sequence route (यह नया route add किया गया है)
+// Reset ID sequence route
 app.post("/courses/reset-sequence", async (req, res) => {
     try {
         console.log("🔄 Resetting course ID sequence...");
@@ -341,6 +337,45 @@ app.post("/courses/reset-sequence", async (req, res) => {
     }
 });
 
+// ✅ BONUS: Emergency table recreation route (केवल जरूरत पड़ने पर use करें)
+app.post("/courses/recreate-table", async (req, res) => {
+    try {
+        console.log("🚨 EMERGENCY: Recreating table (THIS WILL DELETE ALL DATA!)...");
+        
+        // Drop table if exists
+        await pool.query(`DROP TABLE IF EXISTS courses;`);
+        
+        // Create fresh table
+        await pool.query(`
+            CREATE TABLE courses (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                description TEXT,
+                long_description TEXT,
+                duration TEXT,
+                price NUMERIC,
+                level TEXT,
+                image_url TEXT,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+        `);
+        
+        res.json({
+            message: "⚠️ Table recreated successfully (ALL DATA DELETED)",
+            success: true,
+            warning: "This action deleted all existing courses!"
+        });
+        
+    } catch (error) {
+        console.error("❌ Table recreation error:", error);
+        res.status(500).json({ 
+            error: "Failed to recreate table",
+            details: error.message,
+            success: false
+        });
+    }
+});
+
 // Health check route
 app.get("/health", (req, res) => {
     res.json({
@@ -368,7 +403,8 @@ app.use((req, res) => {
             "POST /courses",
             "PUT /courses/:id",
             "DELETE /courses/:id",
-            "POST /courses/reset-sequence"
+            "POST /courses/reset-sequence",
+            "POST /courses/recreate-table (EMERGENCY ONLY)"
         ]
     });
 });
@@ -397,5 +433,5 @@ app.listen(port, () => {
     console.log('   PUT    /courses/:id');
     console.log('   DELETE /courses/:id');
     console.log('   POST   /courses/reset-sequence');
+    console.log('   POST   /courses/recreate-table (EMERGENCY)');
 });
-
