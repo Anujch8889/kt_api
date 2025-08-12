@@ -38,9 +38,14 @@ app.use((req, res, next) => {
 // Enhanced table creation with detailed logging
 (async () => {
     try {
-        console.log("🔄 Creating table...");
+        console.log("🔄 Dropping and recreating table...");
+        
+        // Drop table if exists (be careful - this will delete existing data)
+        await pool.query(`DROP TABLE IF EXISTS courses;`);
+        
+        // Create fresh table
         await pool.query(`
-            CREATE TABLE IF NOT EXISTS courses (
+            CREATE TABLE courses (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 description TEXT,
@@ -48,21 +53,15 @@ app.use((req, res, next) => {
                 duration TEXT,
                 price NUMERIC,
                 level TEXT,
-                image_url TEXT
+                image_url TEXT,
+                created_at TIMESTAMP DEFAULT NOW()
             );
         `);
-        console.log("✅ Table created successfully");
         
-        // Check if table exists and show columns
-        const checkTable = await pool.query(`
-            SELECT column_name, data_type FROM information_schema.columns 
-            WHERE table_name = 'courses';
-        `);
-        console.log("📋 Table columns:", checkTable.rows);
+        console.log("✅ Table recreated successfully");
         
     } catch (err) {
-        console.error("❌ Table creation error:", err.message);
-        console.error("Full error:", err);
+        console.error("❌ Table recreation error:", err.message);
     }
 })();
 
@@ -208,3 +207,4 @@ app.listen(port, () => {
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔗 Database URL configured: ${!!process.env.DATABASE_URL}`);
 });
+
