@@ -1,52 +1,51 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
-const dataFilePath = path.join(__dirname, "data.json");
 
-// Helper function to load data
-function loadData() {
-    const rawData = fs.readFileSync(dataFilePath);
-    return JSON.parse(rawData);
-}
+// PostgreSQL connection
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // Render PostgreSQL ke liye zaroori
+});
 
-// Helper function to save data
-function saveData(data) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-}
+// Create table if not exists
+(async () => {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS courses (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT
+        );
+    `);
+})();
 
+// Root route
 app.get("/", (req, res) => {
-    res.send("Hello i am live");
+    res.send("Hello, I am live with PostgreSQL!");
 });
 
 // GET all courses
-app.get("/courses", (req, res) => {
-    const data = loadData();
-    res.send(data);
+app.get("/courses", async (req, res) => {
+    const result = await pool.query("SELECT * FROM courses ORDER BY id ASC");
+    res.json(result.rows);
 });
 
 // POST new course
-app.post("/courses", (req, res) => {
-    const courses = loadData();
-
-    // Auto increment ID
-    const newId = (Math.max(...courses.map(c => Number(c.id))) + 1).toString();
-
-    const newCourse = { id: newId, ...req.body };
-    courses.push(newCourse);
-
-    // Save to file
-    saveData(courses);
-
-    res.status(201).send({
+app.post("/courses", async (req, res) => {
+    const { name, description } = req.body;
+    const result = await pool.query(
+        "INSERT INTO courses (name, description) VALUES ($1, $2) RETURNING *",
+        [name, description]
+    );
+    res.status(201).json({
         message: "Course added successfully",
-        data: newCourse
+        data: result.rows[0]
     });
 });
 
