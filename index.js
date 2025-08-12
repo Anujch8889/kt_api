@@ -33,14 +33,18 @@ app.use((req, res, next) => {
     next();
 });
 
-// Enhanced table creation with detailed logging
+// Isko bilkul bhi changee mt krna jab tak koi bhout important kam na ho
+// Enhanced table creation with DROP and CREATE
 (async () => {
     try {
-        console.log("🔄 Checking and creating table...");
+        console.log("🔄 Dropping and recreating table...");
         
-        // Create table if not exists (safer approach)
+        // Drop table if exists (be careful - this will delete existing data)
+        await pool.query(`DROP TABLE IF EXISTS courses;`);
+        
+        // Create fresh table
         await pool.query(`
-            CREATE TABLE IF NOT EXISTS courses (
+            CREATE TABLE courses (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 description TEXT,
@@ -53,10 +57,10 @@ app.use((req, res, next) => {
             );
         `);
         
-        console.log("✅ Table ready");
+        console.log("✅ Table recreated successfully");
         
     } catch (err) {
-        console.error("❌ Table creation error:", err.message);
+        console.error("❌ Table recreation error:", err.message);
     }
 })();
 
@@ -178,7 +182,7 @@ app.post("/courses", async (req, res) => {
     }
 });
 
-// PUT update course by ID - ⭐ यह route missing था
+// PUT update course by ID
 app.put("/courses/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -234,7 +238,7 @@ app.put("/courses/:id", async (req, res) => {
     }
 });
 
-// DELETE course by ID - ⭐ यह route भी missing था
+// DELETE course by ID
 app.delete("/courses/:id", async (req, res) => {
     try {
         const { id } = req.params;
@@ -275,6 +279,68 @@ app.delete("/courses/:id", async (req, res) => {
     }
 });
 
+// ⭐ NEW: Reset ID sequence route (यह नया route add किया गया है)
+app.post("/courses/reset-sequence", async (req, res) => {
+    try {
+        console.log("🔄 Resetting course ID sequence...");
+        
+        // Get current courses ordered by creation time
+        const coursesResult = await pool.query("SELECT * FROM courses ORDER BY created_at ASC");
+        const courses = coursesResult.rows;
+        
+        if (courses.length === 0) {
+            // If no courses, just reset sequence to 1
+            await pool.query("ALTER SEQUENCE courses_id_seq RESTART WITH 1");
+            return res.json({
+                message: "ID sequence reset successfully (no courses found)",
+                success: true
+            });
+        }
+        
+        // Temporarily drop the constraint to allow ID updates
+        await pool.query("ALTER TABLE courses DROP CONSTRAINT courses_pkey");
+        
+        // Update IDs sequentially
+        for (let i = 0; i < courses.length; i++) {
+            const newId = i + 1;
+            const oldId = courses[i].id;
+            
+            await pool.query("UPDATE courses SET id = $1 WHERE id = $2", [newId, oldId]);
+        }
+        
+        // Recreate the primary key constraint
+        await pool.query("ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (id)");
+        
+        // Reset the sequence to start from the next number
+        await pool.query(`ALTER SEQUENCE courses_id_seq RESTART WITH ${courses.length + 1}`);
+        
+        console.log("✅ ID sequence reset successful");
+        
+        res.json({
+            message: "Course IDs reorganized successfully",
+            success: true,
+            totalCourses: courses.length,
+            nextId: courses.length + 1
+        });
+        
+    } catch (error) {
+        console.error("❌ Sequence reset error:", error);
+        
+        // Try to restore the primary key if something went wrong
+        try {
+            await pool.query("ALTER TABLE courses ADD CONSTRAINT courses_pkey PRIMARY KEY (id)");
+        } catch (restoreError) {
+            console.error("❌ Failed to restore primary key:", restoreError);
+        }
+        
+        res.status(500).json({ 
+            error: "Failed to reset sequence",
+            details: error.message,
+            success: false
+        });
+    }
+});
+
 // Health check route
 app.get("/health", (req, res) => {
     res.json({
@@ -301,7 +367,8 @@ app.use((req, res) => {
             "GET /courses/:id",
             "POST /courses",
             "PUT /courses/:id",
-            "DELETE /courses/:id"
+            "DELETE /courses/:id",
+            "POST /courses/reset-sequence"
         ]
     });
 });
@@ -329,6 +396,5 @@ app.listen(port, () => {
     console.log('   POST   /courses');
     console.log('   PUT    /courses/:id');
     console.log('   DELETE /courses/:id');
+    console.log('   POST   /courses/reset-sequence');
 });
-
-
