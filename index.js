@@ -63,7 +63,7 @@ app.use((req, res, next) => {
 // Root route
 app.get("/", (req, res) => {
     res.json({
-        message: "Hello, I am live with PostgreSQL!",
+        message: "Hello, I am live with Anuj!",
         timestamp: new Date().toISOString(),
         status: "running"
     });
@@ -330,3 +330,4 @@ app.listen(port, () => {
     console.log('   PUT    /courses/:id');
     console.log('   DELETE /courses/:id');
 });
+
