@@ -20,17 +20,15 @@ const port = process.env.PORT || 3000;
 // PostgreSQL connection
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Render PostgreSQL ke liye zaroori
+    ssl: { rejectUnauthorized: false }
 });
 
-// Debug middleware for POST requests
+// Debug middleware for requests
 app.use((req, res, next) => {
-    if (req.method === 'POST' && req.url === '/courses') {
-        console.log("🔍 Debug POST /courses:");
+    console.log(`🔍 ${req.method} ${req.url} - ${new Date().toISOString()}`);
+    if (req.method === 'POST' || req.method === 'PUT') {
         console.log("Headers:", req.headers);
         console.log("Body:", req.body);
-        console.log("Body type:", typeof req.body);
-        console.log("Content-Length:", req.headers['content-length']);
     }
     next();
 });
@@ -38,14 +36,11 @@ app.use((req, res, next) => {
 // Enhanced table creation with detailed logging
 (async () => {
     try {
-        console.log("🔄 Dropping and recreating table...");
+        console.log("🔄 Checking and creating table...");
         
-        // Drop table if exists (be careful - this will delete existing data)
-        await pool.query(`DROP TABLE IF EXISTS courses;`);
-        
-        // Create fresh table
+        // Create table if not exists (safer approach)
         await pool.query(`
-            CREATE TABLE courses (
+            CREATE TABLE IF NOT EXISTS courses (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 description TEXT,
@@ -58,10 +53,10 @@ app.use((req, res, next) => {
             );
         `);
         
-        console.log("✅ Table recreated successfully");
+        console.log("✅ Table ready");
         
     } catch (err) {
-        console.error("❌ Table recreation error:", err.message);
+        console.error("❌ Table creation error:", err.message);
     }
 })();
 
@@ -107,17 +102,37 @@ app.get("/courses", async (req, res) => {
     }
 });
 
-// POST new course - Enhanced with detailed debugging
+// GET single course by ID
+app.get("/courses/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📥 GET /courses/${id} request received`);
+        
+        const result = await pool.query("SELECT * FROM courses WHERE id = $1", [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ 
+                error: "Course not found",
+                id: id
+            });
+        }
+        
+        console.log(`✅ Found course with id ${id}`);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error(`❌ GET /courses/${req.params.id} error:`, error);
+        res.status(500).json({ error: "Database query failed" });
+    }
+});
+
+// POST new course
 app.post("/courses", async (req, res) => {
     try {
-        // Log incoming request data
         console.log("📨 POST /courses request received");
         console.log("Request Body:", JSON.stringify(req.body, null, 2));
-        console.log("Content-Type:", req.headers['content-type']);
 
         const { title, description, long_description, duration, price, level, image_url } = req.body;
 
-        // Log extracted values
         console.log("Extracted values:", {
             title: title || "MISSING",
             description: description || "MISSING",
@@ -128,7 +143,6 @@ app.post("/courses", async (req, res) => {
             image_url: image_url || "MISSING"
         });
 
-        // Enhanced validation
         if (!title || title.trim() === '') {
             console.log("❌ Validation failed: Title is required");
             return res.status(400).json({ 
@@ -138,7 +152,6 @@ app.post("/courses", async (req, res) => {
         }
 
         console.log("💾 Attempting database insert...");
-        console.log("SQL Values:", [title, description, long_description, duration, price, level, image_url]);
         
         const result = await pool.query(
             `INSERT INTO courses (title, description, long_description, duration, price, level, image_url) 
@@ -155,18 +168,108 @@ app.post("/courses", async (req, res) => {
         });
         
     } catch (error) {
-        // Detailed error logging
-        console.error("❌ POST /courses error:");
-        console.error("Error message:", error.message);
-        console.error("Error code:", error.code);
-        console.error("Error detail:", error.detail);
-        console.error("Error hint:", error.hint);
-        console.error("Error stack:", error.stack);
-        
+        console.error("❌ POST /courses error:", error);
         res.status(500).json({ 
             error: "Failed to add course",
             details: error.message,
             code: error.code,
+            success: false
+        });
+    }
+});
+
+// PUT update course by ID - ⭐ यह route missing था
+app.put("/courses/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📝 PUT /courses/${id} request received`);
+        console.log("Request Body:", JSON.stringify(req.body, null, 2));
+
+        const { title, description, long_description, duration, price, level, image_url } = req.body;
+
+        // Validation
+        if (!title || title.trim() === '') {
+            console.log("❌ Validation failed: Title is required");
+            return res.status(400).json({ 
+                error: "Title is required",
+                received: { title }
+            });
+        }
+
+        // Check if course exists
+        const existingCourse = await pool.query("SELECT * FROM courses WHERE id = $1", [id]);
+        
+        if (existingCourse.rows.length === 0) {
+            return res.status(404).json({ 
+                error: "Course not found",
+                id: id
+            });
+        }
+
+        console.log("💾 Attempting database update...");
+        
+        const result = await pool.query(
+            `UPDATE courses 
+             SET title = $1, description = $2, long_description = $3, 
+                 duration = $4, price = $5, level = $6, image_url = $7
+             WHERE id = $8 RETURNING *`,
+            [title, description, long_description, duration, price, level, image_url, id]
+        );
+
+        console.log("✅ Database update successful:", result.rows[0]);
+
+        res.json({
+            message: "Course updated successfully",
+            data: result.rows[0],
+            success: true
+        });
+        
+    } catch (error) {
+        console.error(`❌ PUT /courses/${req.params.id} error:`, error);
+        res.status(500).json({ 
+            error: "Failed to update course",
+            details: error.message,
+            success: false
+        });
+    }
+});
+
+// DELETE course by ID - ⭐ यह route भी missing था
+app.delete("/courses/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`🗑️ DELETE /courses/${id} request received`);
+
+        // Check if course exists
+        const existingCourse = await pool.query("SELECT * FROM courses WHERE id = $1", [id]);
+        
+        if (existingCourse.rows.length === 0) {
+            return res.status(404).json({ 
+                error: "Course not found",
+                id: id
+            });
+        }
+
+        console.log("💾 Attempting database delete...");
+        
+        const result = await pool.query(
+            "DELETE FROM courses WHERE id = $1 RETURNING *",
+            [id]
+        );
+
+        console.log("✅ Database delete successful:", result.rows[0]);
+
+        res.json({
+            message: "Course deleted successfully",
+            data: result.rows[0],
+            success: true
+        });
+        
+    } catch (error) {
+        console.error(`❌ DELETE /courses/${req.params.id} error:`, error);
+        res.status(500).json({ 
+            error: "Failed to delete course",
+            details: error.message,
             success: false
         });
     }
@@ -184,11 +287,22 @@ app.get("/health", (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
+    console.log(`❌ 404 - Route not found: ${req.method} ${req.url}`);
     res.status(404).json({
         error: "Route not found",
         method: req.method,
         url: req.url,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        availableRoutes: [
+            "GET /",
+            "GET /health", 
+            "GET /test-connection",
+            "GET /courses",
+            "GET /courses/:id",
+            "POST /courses",
+            "PUT /courses/:id",
+            "DELETE /courses/:id"
+        ]
     });
 });
 
@@ -206,5 +320,13 @@ app.listen(port, () => {
     console.log(`🚀 Server running on port ${port}`);
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔗 Database URL configured: ${!!process.env.DATABASE_URL}`);
+    console.log('📋 Available routes:');
+    console.log('   GET    /');
+    console.log('   GET    /health');
+    console.log('   GET    /test-connection');
+    console.log('   GET    /courses');
+    console.log('   GET    /courses/:id');
+    console.log('   POST   /courses');
+    console.log('   PUT    /courses/:id');
+    console.log('   DELETE /courses/:id');
 });
-
